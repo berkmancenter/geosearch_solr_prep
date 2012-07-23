@@ -1,79 +1,66 @@
 <%
-marc_fields = [
-    '100a', '100c', '100d', '245a', '245c', '260a', '260b', '260c',
-    '300a', '300c', '500a', '655a', '700a', '700d', '700e', '752a',
-    '752d', '440a', '440p', '830a', '830p', '840a', '130a', '730a',
-    '240a', '260f', '260e', '752b', '034d', '034e', '034f', '034g',
-    '245b', '245c', '245p', '246a', '740a', '600y', '610y', '611y',
-    '630y', '650y', '651y', '655y', '690y', '691y', '692y', '693y',
-    '694y', '695y', '600v', '610v', '611v', '630v', '650v', '651v',
-    '655b', '655v', '690v', '691v', '692v', '693v', '694v', '695v'
-]
+    marc_fields = [
+        '100a', '100c', '100d', '245a', '245c', '260a', '260b', '260c',
+        '300a', '300c', '500a', '655a', '700a', '700d', '700e', '752a',
+        '752d', '440a', '440p', '830a', '830p', '840a', '130a', '730a',
+        '240a', '260f', '260e', '752b', '034d', '034e', '034f', '034g',
+        '245b', '245c', '245p', '246a', '740a', '600y', '610y', '611y',
+        '630y', '650y', '651y', '655y', '690y', '691y', '692y', '693y',
+        '694y', '695y', '600v', '610v', '611v', '630v', '650v', '651v',
+        '655b', '655v', '690v', '691v', '692v', '693v', '694v', '695v'
+    ]
+    dpla_fields = [
+        'dpla.contributor_record_id', 'dpla.dataset_id', 'dpla.date', 'dpla.id',
+        'dpla.oclc', 'dpla.subject', 'dpla.creator', 'dpla.description', 'dpla.language',
+        'dpla.format', 'dpla.format', 'dpla.title', 'dpla.publisher', 'dpla.isbn',
+        'dpla.lccn', 'dpla.resource_type', 'dpla.keyword', 'dpla.contributor'
+    ]
+
 %>
 <% docs.each do |doc| %>
     <% doc['geotags'].each do |geotag| %>
-<add allowDups="false">
-    <doc>
-        <field name="RecId"><%= doc['dpla.contributor_record_id'] %>-<%= geotag['anchor_start'] %></field>
+        <add allowDups="false">
+            <doc>
+                <field name="RecId"><%= doc['dpla.contributor_record_id'] %>-<%= geotag['anchor_start'] %></field>
 
-        <field name="dpla_contributor_record_id"><%= doc['dpla.contributor_record_id'] %></field>
-        <field name="dpla_dataset_id"><%= doc['dpla.dataset_id'] %></field>
-        <field name="dpla_date"><%= doc['dpla.date'] %></field>
-        <field name="dpla_id"><%= doc['dpla.id'] %></field>
-        <field name="dpla_oclc"><%= doc['dpla.oclc'] %></field>
-
-        <% if doc['dpla.subject'] %>
-            <% doc['dpla.subject'].each do |subject| %>
-                <field name="dpla_subject"><%= subject %></field>
-            <% end %>
-        <% end %>
-        <% doc['dpla.creator'].each do |creator| %>
-        <field name="dpla_creator"><%= creator %></field>
-        <% end %>
-        <% if doc['dpla.description'] %>
-            <% doc['dpla.description'].each do |description| %>
-                <field name="dpla_description"><%= description %></field>
-            <% end %>
-        <% end %>
-        <field name="dpla_language"><%= doc['dpla.language'] %></field>
-        <field name="dpla_format"><%= doc['dpla.format'] %></field>
-
-        <field name="dpla_title"><%= doc['dpla.title'] %></field>
-        <% if doc['dpla.publisher'] %>
-            <field name="dpla_publisher"><%= doc['dpla.publisher'].clean %></field>
-        <% end %>
-        <field name="dpla_isbn"><%= doc['dpla.isbn'] %></field>
-        <field name="dpla_lccn"><%= doc['dpla.lccn'] %></field>
-        <field name="dpla_resource_type"><%= doc['dpla.resource_type'] %></field>
-        <field name="dpla_keyword"></field>
-        <field name="dpla_contributor"><%= doc['dpla.contributor'] %></field>
-
-        <% marc_fields.each do |field| %>
-            <% if doc[field].kind_of? Array %>
-                <% doc[field].each do |field_value| %>
-                    <field name="<%= field %>"><%= field_value.clean %></field>
+                <% dpla_fields.each do |field| %>
+                    <% field_name = field.sub('.', '_') %>
+                    <% if doc[field].kind_of? Array %>
+                        <% doc[field].each do |field_value| %>
+                <field name="<%= field_name %>"><%= field_value.clean %></field>
+                        <% end %>
+                    <% elsif doc[field] %>
+                <field name="<%= field_name %>"><%= doc[field].clean %></field>
+                    <% end %>
                 <% end %>
-            <% elsif doc[field] %>
+
+                <% marc_fields.each do |field| %>
+                    <% if doc[field].kind_of? Array %>
+                        <% doc[field].each do |field_value| %>
+                <field name="<%= field %>"><%= field_value.clean %></field>
+                        <% end %>
+                    <% elsif doc[field] %>
                 <field name="<%= field %>"><%= doc[field].clean %></field>
-            <% end %>
-        <% end %>
+                    <% end %>
+                <% end %>
 
-        <field name="Match_Confidence"><%= geotag['confidence'] %></field>
+                <field name="Match_Confidence"><%= geotag['confidence'] %></field>
 
-        <% geotag['disjuncts'].each_with_index do |disjunct, i| %>
-        <field name="Disjunct_Weight<%= i %>"><%= disjunct['weight'] %></field>
-        <field name="Conjunct_Name<%= i %>"><%= disjunct['name'] %></field>
-        <field name="Conjunct_Country<%= i %>"><%= disjunct['country'] %></field>
-        <field name="Conjunct_CountryName<%= i %>"><%= disjunct['country_name'] %></field>
-        <field name="Conjunct_CountryConfidence<%= i %>"><%= disjunct['country_confidence'] %></field>
-        <field name="Conjunct_Province<%= i %>"><%= disjunct['province'] %></field>
-        <field name="Conjunct_ProvinceName<%= i %>"><%= disjunct['province_name'] %></field>
-        <field name="Conjunct_ProvinceConfidence<%= i %>"><%= disjunct['province_confidence'] %></field>
-        <field name="Conjunct_Latitude<%= i %>"><%= disjunct['latitude'] %></field>
-        <field name="Conjunct_Longitude<%= i %>"><%= disjunct['longitude'] %></field>
-        <% end %>
+                <% geotag['disjuncts'].each_with_index do |disjunct, i| %>
+                <field name="Disjunct_Weight<%= i %>"><%= disjunct['weight'] %></field>
+                <field name="Conjunct_Name<%= i %>"><%= disjunct['name'] %></field>
+                <field name="Conjunct_Country<%= i %>"><%= disjunct['country'] %></field>
+                <field name="Conjunct_CountryName<%= i %>"><%= disjunct['country_name'] %></field>
+                <field name="Conjunct_CountryConfidence<%= i %>"><%= disjunct['country_confidence'] %></field>
+                <field name="Conjunct_Province<%= i %>"><%= disjunct['province'] %></field>
+                <field name="Conjunct_ProvinceName<%= i %>"><%= disjunct['province_name'] %></field>
+                <field name="Conjunct_ProvinceConfidence<%= i %>"><%= disjunct['province_confidence'] %></field>
+                <field name="Conjunct_Latitude<%= i %>"><%= disjunct['latitude'] %></field>
+                <field name="Conjunct_Longitude<%= i %>"><%= disjunct['longitude'] %></field>
+                <% end %>
 
-        <field name="MarcText"><%= doc.to_json %></field>
-    </doc>
-</add>
-<% end end %>
+                <field name="MarcText"><%= doc.to_json %></field>
+            </doc>
+        </add>
+    <% end %>
+<% end %>
