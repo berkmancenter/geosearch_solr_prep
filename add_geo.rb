@@ -1,6 +1,7 @@
 require 'json/ext'
 require 'nokogiri'
 require 'erb'
+require 'cgi'
 
 class GeoTags < Nokogiri::XML::SAX::Document
 
@@ -49,7 +50,7 @@ end
 
 class String
     def clean
-        self.gsub(/\A[^\[\w\(]+|[^\w\)\]]+\z/, '')
+        CGI::escapeHTML(self.gsub(/\A[^\[\w\(]+|[^\w\)\]]+\z/, ''))
     end
 end
 
@@ -74,5 +75,6 @@ parser.parse(File.open('sample_files/geotags.xml'))
 erb_template = ERB.new(File.read('solr_record_template.xml.erb'))
 
 docs = $json_contents['docs']
-records = erb_template.result(binding)#.gsub(/^\s*\n/,'')
+records = erb_template.result(binding).gsub(/^\s*\n/,'')
+
 File.open("output/test.xml", 'w') { |f| f.write(records) }

@@ -12,8 +12,8 @@
     dpla_fields = [
         'dpla.contributor_record_id', 'dpla.dataset_id', 'dpla.date', 'dpla.id',
         'dpla.oclc', 'dpla.subject', 'dpla.creator', 'dpla.description', 'dpla.language',
-        'dpla.format', 'dpla.format', 'dpla.title', 'dpla.publisher', 'dpla.isbn',
-        'dpla.lccn', 'dpla.resource_type', 'dpla.keyword', 'dpla.contributor'
+        'dpla.format', 'dpla.title', 'dpla.publisher', 'dpla.isbn', 'dpla.lccn',
+        'dpla.resource_type', 'dpla.keyword', 'dpla.contributor'
     ]
 
 %>
@@ -47,19 +47,19 @@
                 <field name="Match_Confidence"><%= geotag['confidence'] %></field>
 
                 <% geotag['disjuncts'].each_with_index do |disjunct, i| %>
-                <field name="Disjunct_Weight<%= i %>"><%= disjunct['weight'] %></field>
-                <field name="Conjunct_Name<%= i %>"><%= disjunct['name'] %></field>
-                <field name="Conjunct_Country<%= i %>"><%= disjunct['country'] %></field>
-                <field name="Conjunct_CountryName<%= i %>"><%= disjunct['country_name'] %></field>
-                <field name="Conjunct_CountryConfidence<%= i %>"><%= disjunct['country_confidence'] %></field>
-                <field name="Conjunct_Province<%= i %>"><%= disjunct['province'] %></field>
-                <field name="Conjunct_ProvinceName<%= i %>"><%= disjunct['province_name'] %></field>
-                <field name="Conjunct_ProvinceConfidence<%= i %>"><%= disjunct['province_confidence'] %></field>
-                <field name="Conjunct_Latitude<%= i %>"><%= disjunct['latitude'] %></field>
-                <field name="Conjunct_Longitude<%= i %>"><%= disjunct['longitude'] %></field>
+                <field name="Disjunct_Weight<%= i + 1 %>"><%= disjunct['weight'] %></field>
+                <field name="Conjunct_Name<%= i + 1 %>"><%= disjunct['name'] %></field>
+                <field name="Conjunct_Country<%= i + 1 %>"><%= disjunct['country'] %></field>
+                <field name="Conjunct_CountryName<%= i + 1 %>"><%= disjunct['country_name'] %></field>
+                <field name="Conjunct_CountryConfidence<%= i + 1 %>"><%= disjunct['country_confidence'] %></field>
+                <field name="Conjunct_Province<%= i + 1 %>"><%= disjunct['province'] %></field>
+                <field name="Conjunct_ProvinceName<%= i + 1 %>"><%= disjunct['province_name'] %></field>
+                <field name="Conjunct_ProvinceConfidence<%= i + 1 %>"><%= disjunct['province_confidence'] %></field>
+                <field name="Conjunct_Latitude<%= i + 1 %>"><%= disjunct['latitude'] %></field>
+                <field name="Conjunct_Longitude<%= i + 1 %>"><%= disjunct['longitude'] %></field>
                 <% end %>
 
-                <field name="MarcText"><%= doc.to_json %></field>
+                <field name="MarcText"><![CDATA[<%= doc.to_json %>]]></field>
             </doc>
         </add>
     <% end %>
