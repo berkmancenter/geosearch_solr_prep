@@ -49,9 +49,15 @@
         <% geotag['disjuncts'].each_with_index do |disjunct, i| %>
         <field name="Disjunct_Weight<%= i + 1 %>"><%= disjunct['weight'] %></field>
         <field name="Conjunct_Name<%= i + 1 %>"><%= disjunct['name'] %></field>
+        <% if disjunct['country'] %>
         <field name="Conjunct_Country<%= i + 1 %>"><%= disjunct['country'] %></field>
+        <% end %>
+        <% if disjunct['country_name'] %>
         <field name="Conjunct_CountryName<%= i + 1 %>"><%= disjunct['country_name'] %></field>
+        <% end %>
+        <% if disjunct['country_confidence'] %>
         <field name="Conjunct_CountryConfidence<%= i + 1 %>"><%= disjunct['country_confidence'] %></field>
+        <% end %>
         <% if disjunct['province'] %>
         <field name="Conjunct_Province<%= i + 1 %>"><%= disjunct['province'] %></field>
         <% end %>

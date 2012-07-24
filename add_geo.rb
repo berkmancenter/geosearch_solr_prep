@@ -24,9 +24,9 @@ class GeoTags < Nokogiri::XML::SAX::Document
             @disjunct['weight']              = attrs['Weight']
         when 'Conjunct'
             @disjunct['name']                = attrs['Name']
-            @disjunct['country']             = attrs['Country']
-            @disjunct['country_name']        = attrs['CountryName']
-            @disjunct['country_confidence']  = attrs['CountryConfidence']
+            @disjunct['country']             = attrs['Country'] if attrs['Country']
+            @disjunct['country_name']        = attrs['CountryName'] if attrs['CountryName']
+            @disjunct['country_confidence']  = attrs['CountryConfidence'] if attrs['CountryConfidence']
             @disjunct['province']            = attrs['Province'] if attrs['Province']
             @disjunct['province_name']       = attrs['ProvinceName'] if attrs['ProvinceName']
             @disjunct['province_confidence'] = attrs['ProvinceConfidence'] if attrs['ProvinceConfidence']
