@@ -76,5 +76,9 @@ erb_template = ERB.new(File.read('solr_record_template.xml.erb'))
 
 docs = $json_contents['docs']
 records = erb_template.result(binding).gsub(/^\s*\n/,'')
-
-File.open("output/test.xml", 'w') { |f| f.write(records) }
+records = records.split(/<\/add>/)
+records.each_with_index do |record, i|
+    if i != records.length - 1
+        File.open("output/collection/record#{i}.xml", 'w') { |f| f.write((record + '</add>').strip) }
+    end
+end

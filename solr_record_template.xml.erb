@@ -19,48 +19,48 @@
 %>
 <% docs.each do |doc| %>
     <% doc['geotags'].each do |geotag| %>
-        <add allowDups="false">
-            <doc>
-                <field name="RecId"><%= doc['dpla.contributor_record_id'] %>-<%= geotag['anchor_start'] %></field>
+<add allowDups="false">
+    <doc>
+        <field name="RecId"><%= doc['dpla.contributor_record_id'] %>-<%= geotag['anchor_start'] %></field>
 
-                <% dpla_fields.each do |field| %>
-                    <% field_name = field.sub('.', '_') %>
-                    <% if doc[field].kind_of? Array %>
-                        <% doc[field].each do |field_value| %>
-                <field name="<%= field_name %>"><%= field_value.clean %></field>
-                        <% end %>
-                    <% elsif doc[field] %>
-                <field name="<%= field_name %>"><%= doc[field].clean %></field>
-                    <% end %>
+        <% dpla_fields.each do |field| %>
+            <% field_name = field.sub('.', '_') %>
+            <% if doc[field].kind_of? Array %>
+                <% doc[field].each do |field_value| %>
+        <field name="<%= field_name %>"><%= field_value.clean %></field>
                 <% end %>
+            <% elsif doc[field] %>
+        <field name="<%= field_name %>"><%= doc[field].clean %></field>
+            <% end %>
+        <% end %>
 
-                <% marc_fields.each do |field| %>
-                    <% if doc[field].kind_of? Array %>
-                        <% doc[field].each do |field_value| %>
-                <field name="<%= field %>"><%= field_value.clean %></field>
-                        <% end %>
-                    <% elsif doc[field] %>
-                <field name="<%= field %>"><%= doc[field].clean %></field>
-                    <% end %>
+        <% marc_fields.each do |field| %>
+            <% if doc[field].kind_of? Array %>
+                <% doc[field].each do |field_value| %>
+        <field name="<%= field %>"><%= field_value.clean %></field>
                 <% end %>
+            <% elsif doc[field] %>
+        <field name="<%= field %>"><%= doc[field].clean %></field>
+            <% end %>
+        <% end %>
 
-                <field name="Match_Confidence"><%= geotag['confidence'] %></field>
+        <field name="Match_Confidence"><%= geotag['confidence'] %></field>
 
-                <% geotag['disjuncts'].each_with_index do |disjunct, i| %>
-                <field name="Disjunct_Weight<%= i + 1 %>"><%= disjunct['weight'] %></field>
-                <field name="Conjunct_Name<%= i + 1 %>"><%= disjunct['name'] %></field>
-                <field name="Conjunct_Country<%= i + 1 %>"><%= disjunct['country'] %></field>
-                <field name="Conjunct_CountryName<%= i + 1 %>"><%= disjunct['country_name'] %></field>
-                <field name="Conjunct_CountryConfidence<%= i + 1 %>"><%= disjunct['country_confidence'] %></field>
-                <field name="Conjunct_Province<%= i + 1 %>"><%= disjunct['province'] %></field>
-                <field name="Conjunct_ProvinceName<%= i + 1 %>"><%= disjunct['province_name'] %></field>
-                <field name="Conjunct_ProvinceConfidence<%= i + 1 %>"><%= disjunct['province_confidence'] %></field>
-                <field name="Conjunct_Latitude<%= i + 1 %>"><%= disjunct['latitude'] %></field>
-                <field name="Conjunct_Longitude<%= i + 1 %>"><%= disjunct['longitude'] %></field>
-                <% end %>
+        <% geotag['disjuncts'].each_with_index do |disjunct, i| %>
+        <field name="Disjunct_Weight<%= i + 1 %>"><%= disjunct['weight'] %></field>
+        <field name="Conjunct_Name<%= i + 1 %>"><%= disjunct['name'] %></field>
+        <field name="Conjunct_Country<%= i + 1 %>"><%= disjunct['country'] %></field>
+        <field name="Conjunct_CountryName<%= i + 1 %>"><%= disjunct['country_name'] %></field>
+        <field name="Conjunct_CountryConfidence<%= i + 1 %>"><%= disjunct['country_confidence'] %></field>
+        <field name="Conjunct_Province<%= i + 1 %>"><%= disjunct['province'] %></field>
+        <field name="Conjunct_ProvinceName<%= i + 1 %>"><%= disjunct['province_name'] %></field>
+        <field name="Conjunct_ProvinceConfidence<%= i + 1 %>"><%= disjunct['province_confidence'] %></field>
+        <field name="Conjunct_Latitude<%= i + 1 %>"><%= disjunct['latitude'] %></field>
+        <field name="Conjunct_Longitude<%= i + 1 %>"><%= disjunct['longitude'] %></field>
+        <% end %>
 
-                <field name="MarcText"><![CDATA[<%= doc.to_json %>]]></field>
-            </doc>
-        </add>
+        <field name="MarcText"><![CDATA[<%= doc.to_json %>]]></field>
+    </doc>
+</add>
     <% end %>
 <% end %>
