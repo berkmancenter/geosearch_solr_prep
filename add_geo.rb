@@ -43,7 +43,7 @@ class GeoTags < Nokogiri::XML::SAX::Document
             $json_contents['docs'][@json_index]['geotags'] << @geo_tag
             @geo_tag = { 'disjuncts' => [] }
         when 'Disjunct'
-            @geo_tag['disjuncts'] << @disjunct
+            @geo_tag['disjuncts'] << @disjunct if @geo_tag['disjuncts'].length < 3
         end
     end
 end
@@ -79,6 +79,6 @@ records = erb_template.result(binding).gsub(/^\s*\n/,'')
 records = records.split(/<\/add>/)
 records.each_with_index do |record, i|
     if i != records.length - 1
-        File.open("output/collection/record#{i}.xml", 'w') { |f| f.write((record + '</add>').strip) }
+        File.open("output/record_collection/record#{i}.xml", 'w') { |f| f.write((record + '</add>').strip) }
     end
 end

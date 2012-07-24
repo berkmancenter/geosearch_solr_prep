@@ -52,9 +52,15 @@
         <field name="Conjunct_Country<%= i + 1 %>"><%= disjunct['country'] %></field>
         <field name="Conjunct_CountryName<%= i + 1 %>"><%= disjunct['country_name'] %></field>
         <field name="Conjunct_CountryConfidence<%= i + 1 %>"><%= disjunct['country_confidence'] %></field>
+        <% if disjunct['province'] %>
         <field name="Conjunct_Province<%= i + 1 %>"><%= disjunct['province'] %></field>
+        <% end %>
+        <% if disjunct['province_name'] %>
         <field name="Conjunct_ProvinceName<%= i + 1 %>"><%= disjunct['province_name'] %></field>
+        <% end %>
+        <% if disjunct['province_confidence'] %>
         <field name="Conjunct_ProvinceConfidence<%= i + 1 %>"><%= disjunct['province_confidence'] %></field>
+        <% end %>
         <field name="Conjunct_Latitude<%= i + 1 %>"><%= disjunct['latitude'] %></field>
         <field name="Conjunct_Longitude<%= i + 1 %>"><%= disjunct['longitude'] %></field>
         <% end %>
