@@ -1,3 +1,6 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
 require 'json/ext'
 require 'nokogiri'
 require 'erb'
@@ -54,13 +57,60 @@ class String
     end
 end
 
-contents = File.read 'sample_files/dpla_records.json'
+options = {
+    :forced_encoding => 'ASCII',
+    :template => 'solr_record_template.xml.erb',
+    :json_input => '',
+    :geotag_input => '',
+    :output_dir => '.'
+    }
+
+opt_parser = OptionParser.new do |opt|
+    opt.banner = "Usage: prep_solr_records.rb [OPTIONS]"
+    opt.separator ""
+    opt.separator "Options"
+    opt.separator ""
+
+    opt.on('-j', '--json-input FILE', 'the json input file') do |json_input|
+        options[:json_input] = json_input
+    end
+
+    opt.on('-g', '--geotag-input FILE', 'the geotag xml input file') do |geotag_input|
+        options[:geotag_input] = geotag_input
+    end
+
+    opt.on('-o', '--output-dir DIR', 'the output directory') do |output|
+        options[:output_dir] = output
+    end
+
+    opt.on("-e","--encoding [ENCODING]","the encoding into which the output records are coerced") do |encoding|
+        options[:forced_encoding] = encoding
+    end
+
+    opt.on("-t","--template [TEMPLATE]","the template file to fill in") do |template|
+        options[:template] = template
+    end
+
+    opt.on("-h","--help","help") do
+        puts opt_parser
+        exit
+    end
+    opt.separator ""
+end
+
+opt_parser.parse!
+if options[:json_input].empty? or options[:geotag_input].empty or options[:output_dir].empty
+    puts opt_parser
+    exit
+end
+
+contents = File.read options[:json_input]
 end_chars = []
 contents.to_enum(:scan,/"dpla\.title" : "[^"]*"\s*\}/).map do |m,|
     end_chars << $`.size + m.length - 1
 end
 
-contents = contents.encode(Encoding.find('ASCII'), {
+contents = contents.encode(Encoding.find(options[:forced_encoding]), {
     :invalid           => :replace,  # Replace invalid byte sequences
     :undef             => :replace,  # Replace anything not defined in ASCII
     :replace           => ''        # Use a blank for those replacements
@@ -70,15 +120,15 @@ contents = contents.encode(Encoding.find('ASCII'), {
 $json_contents = JSON.parse(contents)
 
 parser = Nokogiri::XML::SAX::Parser.new(GeoTags.new(end_chars))
-parser.parse(File.open('sample_files/geotags.xml'))
+parser.parse(File.open(options[:geotag_input]))
 
-erb_template = ERB.new(File.read('solr_record_template.xml.erb'))
+erb_template = ERB.new(File.read(options[:template]))
 
 docs = $json_contents['docs']
 records = erb_template.result(binding).gsub(/^\s*\n/,'')
 records = records.split(/<\/add>/)
 records.each_with_index do |record, i|
     if i != records.length - 1
-        File.open("output/record_collection/record#{i}.xml", 'w') { |f| f.write((record + '</add>').strip) }
+        File.open("#{options[:output_dir].gsub(/\/$/,'')}/record#{i}.xml", 'w') { |f| f.write((record + '</add>').strip) }
     end
 end
