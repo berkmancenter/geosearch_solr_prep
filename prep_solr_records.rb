@@ -99,7 +99,7 @@ opt_parser = OptionParser.new do |opt|
 end
 
 opt_parser.parse!
-if options[:json_input].empty? or options[:geotag_input].empty or options[:output_dir].empty
+if options[:json_input].empty? or options[:geotag_input].empty? or options[:output_dir].empty?
     puts opt_parser
     exit
 end
