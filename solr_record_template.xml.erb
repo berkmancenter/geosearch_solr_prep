@@ -21,6 +21,14 @@
 <add allowDups="false">
     <doc>
         <field name="RecId"><%= doc['dpla.contributor_record_id'] %>-<%= geotag['anchor_start'] %></field>
+        <field name="primLoc"><%= "#{geotag['disjuncts'][0]['latitude']},#{geotag['disjuncts'][0]['longitude']}" %></field>
+        <field name="cLoc1"><%= "#{geotag['disjuncts'][0]['latitude']},#{geotag['disjuncts'][0]['longitude']}" %></field>
+        <% if geotag['disjuncts'][1] %>
+        <field name="cLoc2"><%= "#{geotag['disjuncts'][1]['latitude']},#{geotag['disjuncts'][1]['longitude']}" %></field>
+        <% end %>
+        <% if geotag['disjuncts'][2] %>
+        <field name="cLoc3"><%= "#{geotag['disjuncts'][2]['latitude']},#{geotag['disjuncts'][2]['longitude']}" %></field>
+        <% end %>
 
         <% dpla_fields.each do |field| %>
             <% field_name = field.sub('.', '_') %>
