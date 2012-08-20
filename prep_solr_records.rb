@@ -21,6 +21,17 @@ class GeoTags < Nokogiri::XML::SAX::Document
         when 'TextExtent'
             @geo_tag['anchor_start']        = attrs['AnchorStart'].to_i
             @geo_tag['anchor_end']          = attrs['AnchorEnd'].to_i
+            matches = nil
+            # Get index of anchor start when json string is reversed
+            start_index = $contents.length - @geo_tag['anchor_end'] - 1
+            until matches
+                # Grab up until the start of the line
+                term_and_field_range = (start_index..$stnetnoc.index(/$/, start_index))
+                term_and_field = $stnetnoc.slice(term_and_field_range).reverse
+                matches = /"([.a-zA-Z0-9_]*)" : /.match(term_and_field)
+                start_index = term_and_field_range.end + 1
+            end
+            @geo_tag['in_field'] = matches[1]
             @json_index = @end_chars.find_index { |end_char| @geo_tag['anchor_end'] < end_char }
         when 'Disjunct'
             @disjunct                        = {}
@@ -104,28 +115,41 @@ if options[:json_input].empty? or options[:geotag_input].empty? or options[:outp
     exit
 end
 
-contents = File.read options[:json_input]
+# Get JSON input
+$contents = File.read options[:json_input]
 end_chars = []
-contents.to_enum(:scan,/"dpla\.title" : "[^"]*"\s*\}/).map do |m,|
+
+# Find the record boundaries and keep track of the last index of each
+$contents.to_enum(:scan,/"dpla\.title" : "[^"]*"\s*\}/).map do |m,|
     end_chars << $`.size + m.length - 1
 end
 
-contents = contents.encode(Encoding.find(options[:forced_encoding]), {
+$stnetnoc = $contents.reverse
+
+# Strip out characters not defined in our encoding
+contents = $contents.encode(Encoding.find(options[:forced_encoding]), {
     :invalid           => :replace,  # Replace invalid byte sequences
     :undef             => :replace,  # Replace anything not defined in ASCII
-    :replace           => ''        # Use a blank for those replacements
+    :replace           => ''         # Use a blank for those replacements
   }
 )
 
+# Get parsed JSON records
 $json_contents = JSON.parse(contents)
 
+# Parse the GeoTagger results and built up the internal data structure
 parser = Nokogiri::XML::SAX::Parser.new(GeoTags.new(end_chars))
 parser.parse(File.open(options[:geotag_input]))
 
 erb_template = ERB.new(File.read(options[:template]))
 
+# Make a nice variable for the template
 docs = $json_contents['docs']
+
+# Fill out the template and remove empty lines
 records = erb_template.result(binding).gsub(/^\s*\n/,'')
+
+# Split the template output into an array and save each record as a separate file
 records = records.split(/<\/add>/)
 records.each_with_index do |record, i|
     if i != records.length - 1
