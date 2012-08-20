@@ -31,7 +31,7 @@
         <% end %>
 
         <% dpla_fields.each do |field| %>
-            <% field_name = field.sub('.', '_') %>
+            <% field_name = field.gsub('.', '_') %>
             <% if doc[field].kind_of? Array %>
                 <% doc[field].each do |field_value| %>
         <field name="<%= field_name %>"><%= field_value.clean %></field>
@@ -52,6 +52,7 @@
         <% end %>
 
         <field name="Match_Confidence"><%= geotag['confidence'] %></field>
+        <field name="Geocoded_Field"><%= geotag['in_field'].gsub('.','_') %></field>
 
         <% geotag['disjuncts'].each_with_index do |disjunct, i| %>
         <field name="Disjunct_Weight<%= i + 1 %>"><%= disjunct['weight'] %></field>
