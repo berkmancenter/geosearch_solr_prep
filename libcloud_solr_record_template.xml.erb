@@ -1,0 +1,70 @@
+<%
+    libcloud_fields = [
+        'id', 'title', 'title_sort', 'title_link_friendly', 'sub_title', 'creator',
+        'publisher', 'pub_location', 'pub_date', 'pub_date_numeric', 'format', 'language',
+        'pages', 'pages_numeric', 'height', 'height_numeric', 'lcsh', 'note',
+        'toc', 'call_num', 'id_inst', 'id_isbn', 'id_lccn', 'id_oclc',
+        'rsrc_key', 'rsrc_value', 'wp_categories', 'online_avail', 'holding_libs', 'ut_id',
+        'ut_count', 'loc_call_num_sort_order', 'loc_call_num_subject', 'url', 'data_source', 'dataset_tag',
+        'shelfrank', 'score_checkouts_undergrad', 'score_checkouts_grad', 'score_checkouts_fac', 'score_reserves', 'score_recalls',
+        'score_course_texts', 'score_holding_libs', 'score_extra_copies', 'score_total', 'title_exact', 'creator_exact',
+        'lcsh_exact', 'wp_categories_exact', 'title_keyword', 'creator_keyword', 'subject_keyword', 'note_keyword', 'keyword'
+    ]
+%>
+<% docs.each do |doc| %>
+    <% doc['geotags'].each do |geotag| %>
+<add allowDups="false">
+    <doc>
+        <field name="RecId"><%= doc['id'] %>-<%= geotag['anchor_start'] %></field>
+        <field name="primLoc"><%= "#{geotag['disjuncts'][0]['latitude']},#{geotag['disjuncts'][0]['longitude']}" %></field>
+        <field name="cLoc1"><%= "#{geotag['disjuncts'][0]['latitude']},#{geotag['disjuncts'][0]['longitude']}" %></field>
+        <% if geotag['disjuncts'][1] %>
+        <field name="cLoc2"><%= "#{geotag['disjuncts'][1]['latitude']},#{geotag['disjuncts'][1]['longitude']}" %></field>
+        <% end %>
+        <% if geotag['disjuncts'][2] %>
+        <field name="cLoc3"><%= "#{geotag['disjuncts'][2]['latitude']},#{geotag['disjuncts'][2]['longitude']}" %></field>
+        <% end %>
+
+        <% libcloud_fields.each do |field| %>
+            <% field_name = field.gsub('.', '_') %>
+            <% if doc[field].kind_of? Array %>
+                <% doc[field].each do |field_value| %>
+        <field name="<%= field_name %>"><%= if field_value.respond_to? 'clean' then field_value.clean else field_value end %></field>
+                <% end %>
+            <% elsif doc[field] %>
+        <field name="<%= field_name %>"><%= if doc[field].respond_to? 'clean' then doc[field].clean else doc[field] end %></field>
+            <% end %>
+        <% end %>
+
+        <field name="Match_Confidence"><%= geotag['confidence'] %></field>
+        <field name="Geocoded_Field"><%= geotag['in_field'].gsub('.','_') %></field>
+        <field name="Anchor"><%= geotag['anchor'].clean %></field>
+
+        <% geotag['disjuncts'].each_with_index do |disjunct, i| %>
+        <field name="Disjunct_Weight<%= i + 1 %>"><%= disjunct['weight'] %></field>
+        <field name="Conjunct_Name<%= i + 1 %>"><%= disjunct['name'] %></field>
+        <% if disjunct['country'] %>
+        <field name="Conjunct_Country<%= i + 1 %>"><%= disjunct['country'] %></field>
+        <% end %>
+        <% if disjunct['country_name'] %>
+        <field name="Conjunct_CountryName<%= i + 1 %>"><%= disjunct['country_name'] %></field>
+        <% end %>
+        <% if disjunct['country_confidence'] %>
+        <field name="Conjunct_CountryConfidence<%= i + 1 %>"><%= disjunct['country_confidence'] %></field>
+        <% end %>
+        <% if disjunct['province'] %>
+        <field name="Conjunct_Province<%= i + 1 %>"><%= disjunct['province'] %></field>
+        <% end %>
+        <% if disjunct['province_name'] %>
+        <field name="Conjunct_ProvinceName<%= i + 1 %>"><%= disjunct['province_name'] %></field>
+        <% end %>
+        <% if disjunct['province_confidence'] %>
+        <field name="Conjunct_ProvinceConfidence<%= i + 1 %>"><%= disjunct['province_confidence'] %></field>
+        <% end %>
+        <field name="Conjunct_Latitude<%= i + 1 %>"><%= disjunct['latitude'] %></field>
+        <field name="Conjunct_Longitude<%= i + 1 %>"><%= disjunct['longitude'] %></field>
+        <% end %>
+    </doc>
+</add>
+    <% end %>
+<% end %>

@@ -21,6 +21,8 @@ class GeoTags < Nokogiri::XML::SAX::Document
         when 'TextExtent'
             @geo_tag['anchor_start']        = attrs['AnchorStart'].to_i
             @geo_tag['anchor_end']          = attrs['AnchorEnd'].to_i
+            @geo_tag['anchor']              = attrs['Anchor']
+            # Find the field in which the geotag occurs
             matches = nil
             # Get index of anchor start when json string is reversed
             start_index = $contents.length - @geo_tag['anchor_end'] - 1
@@ -70,7 +72,8 @@ end
 
 options = {
     :forced_encoding => 'ASCII',
-    :template => 'solr_record_template.xml.erb',
+    :template => '',
+    :input_type => '',
     :json_input => '',
     :geotag_input => '',
     :output_dir => '.'
@@ -90,16 +93,20 @@ opt_parser = OptionParser.new do |opt|
         options[:geotag_input] = geotag_input
     end
 
+    opt.on("-t","--template TEMPLATE","the template file to fill in") do |template|
+        options[:template] = template
+    end
+
+    opt.on('-i', '--input-type TYPE', 'the json input record type ("dpla" or "libcloud" [DEFAULT])') do |input_type|
+        options[:input_type] = input_type
+    end
+
     opt.on('-o', '--output-dir DIR', 'the output directory') do |output|
         options[:output_dir] = output
     end
 
     opt.on("-e","--encoding [ENCODING]","the encoding into which the output records are coerced") do |encoding|
         options[:forced_encoding] = encoding
-    end
-
-    opt.on("-t","--template [TEMPLATE]","the template file to fill in") do |template|
-        options[:template] = template
     end
 
     opt.on("-h","--help","help") do
@@ -110,7 +117,7 @@ opt_parser = OptionParser.new do |opt|
 end
 
 opt_parser.parse!
-if options[:json_input].empty? or options[:geotag_input].empty? or options[:output_dir].empty?
+if options[:json_input].empty? or options[:geotag_input].empty? or options[:output_dir].empty? or options[:template].empty? or options[:input_type].empty?
     puts opt_parser
     exit
 end
@@ -120,8 +127,15 @@ $contents = File.read options[:json_input]
 end_chars = []
 
 # Find the record boundaries and keep track of the last index of each
-$contents.to_enum(:scan,/"dpla\.title" : "[^"]*"\s*\}/).map do |m,|
-    end_chars << $`.size + m.length - 1
+case options[:input_type]
+when "dpla"
+    $contents.to_enum(:scan,/"dpla\.title" : "[^"]*"\s*\}/).map do |m,|
+        end_chars << $`.size + m.length - 1
+    end
+when "libcloud"
+    $contents.to_enum(:scan,/ \}/).map do |m,|
+        end_chars << $`.size
+    end
 end
 
 $stnetnoc = $contents.reverse
@@ -145,6 +159,12 @@ erb_template = ERB.new(File.read(options[:template]))
 
 # Make a nice variable for the template
 docs = $json_contents['docs']
+docs.reject! do |doc|
+    unless doc['geotags']
+        puts doc['id']
+        TRUE
+    end
+end
 
 # Fill out the template and remove empty lines
 records = erb_template.result(binding).gsub(/^\s*\n/,'')
