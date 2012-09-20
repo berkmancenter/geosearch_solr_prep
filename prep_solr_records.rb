@@ -73,7 +73,7 @@ end
 options = {
     :forced_encoding => 'ASCII',
     :template => '',
-    :input_type => '',
+    :input_type => 'libcloud',
     :json_input => '',
     :geotag_input => '',
     :output_dir => '.'
@@ -85,24 +85,24 @@ opt_parser = OptionParser.new do |opt|
     opt.separator "Options"
     opt.separator ""
 
-    opt.on('-j', '--json-input FILE', 'the json input file') do |json_input|
-        options[:json_input] = json_input
+    opt.on('-o', '--output-dir DIR', 'the output directory') do |output|
+        options[:output_dir] = output
     end
 
-    opt.on('-g', '--geotag-input FILE', 'the geotag xml input file') do |geotag_input|
-        options[:geotag_input] = geotag_input
-    end
-
-    opt.on("-t","--template TEMPLATE","the template file to fill in") do |template|
-        options[:template] = template
-    end
-
-    opt.on('-i', '--input-type TYPE', 'the json input record type ("dpla" or "libcloud" [DEFAULT])') do |input_type|
+    opt.on('-i', '--input-type [TYPE]', 'the json input record type ("dpla" or "libcloud")') do |input_type|
         options[:input_type] = input_type
     end
 
-    opt.on('-o', '--output-dir DIR', 'the output directory') do |output|
-        options[:output_dir] = output
+    opt.on('-j', '--json-input [FILE]', 'the json input file') do |json_input|
+        options[:json_input] = json_input
+    end
+
+    opt.on('-g', '--geotag-input [FILE]', 'the geotag xml input file') do |geotag_input|
+        options[:geotag_input] = geotag_input
+    end
+
+    opt.on("-t","--template [TEMPLATE]","the template file to fill in") do |template|
+        options[:template] = template
     end
 
     opt.on("-e","--encoding [ENCODING]","the encoding into which the output records are coerced") do |encoding|
@@ -117,9 +117,23 @@ opt_parser = OptionParser.new do |opt|
 end
 
 opt_parser.parse!
-if options[:json_input].empty? or options[:geotag_input].empty? or options[:output_dir].empty? or options[:template].empty? or options[:input_type].empty?
+if options[:input_type].empty? or options[:output_dir].empty?
     puts opt_parser
     exit
+end
+unless ['dpla', 'libcloud'].include? options[:input_type]
+    puts 'Input type must be one of "dpla" or "libcloud"'
+    puts opt_parser
+    exit
+end
+if options[:json_input].empty?
+    options[:json_input] = "sample_files/#{options[:input_type]}_records.json"
+end
+if options[:geotag_input].empty?
+    options[:geotag_input] = "sample_files/#{options[:input_type]}_geotags.xml"
+end
+if options[:template].empty?
+    options[:template] = "#{options[:input_type]}_solr_record_template.xml.erb"
 end
 
 # Get JSON input
@@ -159,12 +173,6 @@ erb_template = ERB.new(File.read(options[:template]))
 
 # Make a nice variable for the template
 docs = $json_contents['docs']
-docs.reject! do |doc|
-    unless doc['geotags']
-        puts doc['id']
-        TRUE
-    end
-end
 
 # Fill out the template and remove empty lines
 records = erb_template.result(binding).gsub(/^\s*\n/,'')

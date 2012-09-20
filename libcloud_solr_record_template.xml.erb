@@ -12,7 +12,8 @@
     ]
 %>
 <% docs.each do |doc| %>
-    <% doc['geotags'].each do |geotag| %>
+    <% if doc['geotags'] %>
+        <% doc['geotags'].each do |geotag| %>
 <add allowDups="false">
     <doc>
         <field name="RecId"><%= doc['id'] %>-<%= geotag['anchor_start'] %></field>
@@ -63,6 +64,23 @@
         <% end %>
         <field name="Conjunct_Latitude<%= i + 1 %>"><%= disjunct['latitude'] %></field>
         <field name="Conjunct_Longitude<%= i + 1 %>"><%= disjunct['longitude'] %></field>
+        <% end %>
+    </doc>
+</add>
+    <% end %>
+    <% else %>
+<add allowDups="false">
+    <doc>
+        <field name="RecId"><%= doc['id'] %></field>
+        <% libcloud_fields.each do |field| %>
+            <% field_name = field.gsub('.', '_') %>
+            <% if doc[field].kind_of? Array %>
+                <% doc[field].each do |field_value| %>
+        <field name="<%= field_name %>"><%= if field_value.respond_to? 'clean' then field_value.clean else field_value end %></field>
+                <% end %>
+            <% elsif doc[field] %>
+        <field name="<%= field_name %>"><%= if doc[field].respond_to? 'clean' then doc[field].clean else doc[field] end %></field>
+            <% end %>
         <% end %>
     </doc>
 </add>
