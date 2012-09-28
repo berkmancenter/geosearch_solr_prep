@@ -53,13 +53,15 @@ class GeoTags < Nokogiri::XML::SAX::Document
     end
 
     def end_element name
-        case name
-        when 'GeoTag'
-            $json_contents['docs'][@json_index]['geotags'] = [] if !$json_contents['docs'][@json_index]['geotags']
-            $json_contents['docs'][@json_index]['geotags'] << @geo_tag
-            @geo_tag = { 'disjuncts' => [] }
-        when 'Disjunct'
-            @geo_tag['disjuncts'] << @disjunct if @geo_tag['disjuncts'].length < 3
+        if @json_index
+            case name
+            when 'GeoTag'
+                $json_contents['docs'][@json_index]['geotags'] = [] if !$json_contents['docs'][@json_index]['geotags']
+                $json_contents['docs'][@json_index]['geotags'] << @geo_tag
+                @geo_tag = { 'disjuncts' => [] }
+            when 'Disjunct'
+                @geo_tag['disjuncts'] << @disjunct if @geo_tag['disjuncts'].length < 3
+            end
         end
     end
 end
@@ -71,7 +73,7 @@ class String
 end
 
 options = {
-    :forced_encoding => 'ASCII',
+    :forced_encoding => '',
     :template => '',
     :input_type => 'libcloud',
     :json_input => '',
@@ -117,7 +119,7 @@ opt_parser = OptionParser.new do |opt|
 end
 
 opt_parser.parse!
-if options[:input_type].empty? or options[:output_dir].empty?
+if options[:input_type].empty? or options[:output_dir].empty? or options[:output_dir] == '.'
     puts opt_parser
     exit
 end
@@ -137,7 +139,7 @@ if options[:template].empty?
 end
 
 # Get JSON input
-$contents = File.read options[:json_input]
+$contents = File.open(options[:json_input], 'r:bom|utf-8').read
 end_chars = []
 
 # Find the record boundaries and keep track of the last index of each
@@ -155,12 +157,15 @@ end
 $stnetnoc = $contents.reverse
 
 # Strip out characters not defined in our encoding
-contents = $contents.encode(Encoding.find(options[:forced_encoding]), {
-    :invalid           => :replace,  # Replace invalid byte sequences
-    :undef             => :replace,  # Replace anything not defined in ASCII
-    :replace           => ''         # Use a blank for those replacements
-  }
-)
+unless options[:forced_encoding].empty?
+    contents = $contents.encode(Encoding.find(options[:forced_encoding]), {
+        :invalid           => :replace,  # Replace invalid byte sequences
+        :undef             => :replace,  # Replace anything not defined in ASCII
+        :replace           => ''         # Use a blank for those replacements
+    })
+else
+    contents = $contents
+end
 
 # Get parsed JSON records
 $json_contents = JSON.parse(contents)
