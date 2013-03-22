@@ -183,9 +183,16 @@ docs = $json_contents['docs']
 records = erb_template.result(binding).gsub(/^\s*\n/,'')
 
 # Split the template output into an array and save each record as a separate file
+output_prefix = File::basename(options[:json_input], File::extname(options[:json_input]))
 records = records.split(/<\/add>/)
 records.each_with_index do |record, i|
     if i != records.length - 1
-        File.open("#{options[:output_dir].gsub(/\/$/,'')}/record#{i}.xml", 'w') { |f| f.write((record + '</add>').strip) }
+        output_suffix = i
+        filename = "#{options[:output_dir].gsub(/\/$/,'')}/#{output_prefix}_rec_#{output_suffix}.xml"
+        while File::exists?(filename)
+            output_suffix = output_suffix.is_a?(Integer) ? "#{output_suffix}a" : output_suffix.succ
+            filename = "#{options[:output_dir].gsub(/\/$/,'')}/#{output_prefix}_rec_#{output_suffix}.xml"
+        end
+        File.open(filename, 'w') { |f| f.write((record + '</add>').strip) }
     end
 end
