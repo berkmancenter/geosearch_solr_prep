@@ -5,6 +5,7 @@ require 'optparse'
 require 'json/ext'
 require 'nokogiri'
 require 'geohash'
+require 'csv'
 require 'erb'
 require 'cgi'
 
@@ -71,7 +72,7 @@ end
 
 class String
     def clean
-        CGI::escapeHTML(self.gsub(/\A[^\[\w\(]+|[^\w\)\]]+\z/, ''))
+        CGI::escapeHTML(self.gsub(/\A[^\[\w\(]+|[^\w\)\]]+\z/, '')).strip
     end
 end
 
@@ -198,4 +199,39 @@ records.each_with_index do |record, i|
         end
         File.open(filename, 'w') { |f| f.write((record + '</add>').strip) }
     end
+end
+fields = ERB.new(File.read('libcloud_csv_template.csv.erb')).result(binding)
+File.open('test.csv', 'w') { |f| f.write(fields) }
+CSV.open("#{options[:output_dir].gsub(/\/$/,'')}/docs.csv", 'wb') do |csv|
+    csv << [
+'RecId', 'primLoc', 'cLoc1', 'cLoc2', 'cLoc3', 'id', 'title', 'title_sort',
+'title_link_friendly', 'sub_title', 'creator', 'publisher', 'pub_location',
+'pub_date', 'pub_date_numeric', 'format', 'language', 'pages', 'pages_numeric',
+'height', 'height_numeric', 'lcsh', 'note', 'toc', 'call_num', 'id_inst',
+'id_isbn', 'id_lccn', 'id_oclc', 'rsrc_key', 'rsrc_value', 'wp_categories',
+'online_avail', 'holding_libs', 'ut_id', 'ut_count', 'loc_call_num_sort_order',
+'loc_call_num_subject', 'url', 'data_source', 'dataset_tag', 'shelfrank',
+'score_checkouts_undergrad', 'score_checkouts_grad', 'score_checkouts_fac',
+'score_reserves', 'score_recalls', 'score_course_texts', 'score_holding_libs',
+'score_extra_copies', 'score_total', 'title_exact', 'creator_exact',
+'lcsh_exact', 'wp_categories_exact', 'title_keyword', 'creator_keyword',
+'subject_keyword', 'note_keyword', 'keyword', 'Match_Confidence',
+'Geocoded_Field', 'Anchor', 'Disjunct_Weight1', 'Conjunct_Name1',
+'Conjunct_Country1', 'Conjunct_CountryName1', 'Conjunct_CountryConfidence1',
+'Conjunct_Province1', 'Conjunct_ProvinceName1', 'Conjunct_ProvinceConfidence1',
+'Conjunct_Latitude1', 'Conjunct_Longitude1', 'geo_hash12_1', 'geo_hash10_1',
+'geo_hash8_1', 'geo_hash6_1', 'geo_hash4_1', 'geo_hash3_1', 'geo_hash2_1',
+'Disjunct_Weight2', 'Conjunct_Name2', 'Conjunct_Country2',
+'Conjunct_CountryName2', 'Conjunct_CountryConfidence2', 'Conjunct_Province2',
+'Conjunct_ProvinceName2', 'Conjunct_ProvinceConfidence2', 'Conjunct_Latitude2',
+'Conjunct_Longitude2', 'geo_hash12_2', 'geo_hash10_2', 'geo_hash8_2',
+'geo_hash6_2', 'geo_hash4_2', 'geo_hash3_2', 'geo_hash2_2', 'Disjunct_Weight3',
+'Conjunct_Name3', 'Conjunct_Country3', 'Conjunct_CountryName3',
+'Conjunct_CountryConfidence3', 'Conjunct_Province3', 'Conjunct_ProvinceName3',
+'Conjunct_ProvinceConfidence3', 'Conjunct_Latitude3', 'Conjunct_Longitude3',
+'geo_hash12_3', 'geo_hash10_3', 'geo_hash8_3', 'geo_hash6_3', 'geo_hash4_3',
+'geo_hash3_3', 'geo_hash2_3'
+    ]
+   csv << fields.split('<doc-end>')[1].split("\n")
+   fields.split('<doc-end>').each{ |f| puts f.split("\n").count }
 end
