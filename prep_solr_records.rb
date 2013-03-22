@@ -185,6 +185,7 @@ docs = $json_contents['docs']
 
 # Fill out the template and remove empty lines
 records = erb_template.result(binding).gsub(/^\s*\n/,'')
+fields = ERB.new(File.read('libcloud_csv_template.csv.erb')).result(binding)
 
 # Split the template output into an array and save each record as a separate file
 output_prefix = File::basename(options[:json_input], File::extname(options[:json_input]))
@@ -200,8 +201,6 @@ records.each_with_index do |record, i|
         File.open(filename, 'w') { |f| f.write((record + '</add>').strip) }
     end
 end
-fields = ERB.new(File.read('libcloud_csv_template.csv.erb')).result(binding)
-File.open('test.csv', 'w') { |f| f.write(fields) }
 CSV.open("#{options[:output_dir].gsub(/\/$/,'')}/docs.csv", 'wb') do |csv|
     csv << [
 'RecId', 'primLoc', 'cLoc1', 'cLoc2', 'cLoc3', 'id', 'title', 'title_sort',
@@ -232,6 +231,7 @@ CSV.open("#{options[:output_dir].gsub(/\/$/,'')}/docs.csv", 'wb') do |csv|
 'geo_hash12_3', 'geo_hash10_3', 'geo_hash8_3', 'geo_hash6_3', 'geo_hash4_3',
 'geo_hash3_3', 'geo_hash2_3'
     ]
-   csv << fields.split('<doc-end>')[1].split("\n")
-   fields.split('<doc-end>').each{ |f| puts f.split("\n").count }
+    fields.split("\n<doc-end>\n").each do |doc|
+       csv << doc.split("\n")
+    end
 end

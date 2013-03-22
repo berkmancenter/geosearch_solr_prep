@@ -12,38 +12,34 @@
 %><% docs.each do |doc| %><% if doc['geotags'] %><% doc['geotags'].each do |geotag| %><%= doc['id'] %>-<%= geotag['anchor_start'] %>
 <%= "#{geotag['disjuncts'][0]['latitude']},#{geotag['disjuncts'][0]['longitude']}" %>
 <%= "#{geotag['disjuncts'][0]['latitude']},#{geotag['disjuncts'][0]['longitude']}" %>
-<% if geotag['disjuncts'][1] %><%= "#{geotag['disjuncts'][1]['latitude']},#{geotag['disjuncts'][1]['longitude']}" %><% else %>
-<% end %>
-<% if geotag['disjuncts'][2] %><%= "#{geotag['disjuncts'][2]['latitude']},#{geotag['disjuncts'][2]['longitude']}" %><% else %>
-<% end %>
-<% libcloud_fields.each do |field| %><% if doc[field].kind_of? Array %><%= doc[field].map{|field_value| if field_value.respond_to? 'clean' then field_value.clean else field_value end}.join('|||') %><% elsif doc[field] %><%= if doc[field].respond_to? 'clean' then doc[field].clean else doc[field] end %><% end %>
+<% if geotag['disjuncts'][1] %><%= "#{geotag['disjuncts'][1]['latitude']},#{geotag['disjuncts'][1]['longitude']}" %>
+<% else %>
+<% end %><% if geotag['disjuncts'][2] %><%= "#{geotag['disjuncts'][2]['latitude']},#{geotag['disjuncts'][2]['longitude']}" %>
+<% else %>
+<% end %><% libcloud_fields.each do |field| %><% if doc[field].kind_of? Array %><%= doc[field].map{|field_value| if field_value.respond_to? 'clean' then field_value.clean else field_value end}.join('|||') %><% elsif doc[field] %><%= if doc[field].respond_to? 'clean' then doc[field].clean else doc[field] end %><% end %>
 <% end %><%= geotag['confidence'] %>
 <%= geotag['in_field'].gsub('.','_') %>
 <%= geotag['anchor'].clean %>
 <% 3.times do |i| %><% if geotag['disjuncts'][i] then disjunct = geotag['disjuncts'][i] %><%= disjunct['weight'] %>
 <%= disjunct['name'] %>
-<% if disjunct['country'] %><%= disjunct['country'] %><% else %>
-<% end %>
-<% if disjunct['country_name'] %><%= disjunct['country_name'] %><% else %>
-<% end %>
-<% if disjunct['country_confidence'] %><%= disjunct['country_confidence'] %><% else %>
-<% end %>
-<% if disjunct['province'] %><%= disjunct['province'] %><% else %>
-<% end %>
-<% if disjunct['province_name'] %><%= disjunct['province_name'] %><% else %>
-<% end %>
-<% if disjunct['province_confidence'] %><%= disjunct['province_confidence'] %><% else %>
-<% end %>
-<%= disjunct['latitude'] %>
+<% if disjunct['country'] %><%= disjunct['country'] %>
+<% else %>
+<% end %><% if disjunct['country_name'] %><%= disjunct['country_name'] %>
+<% else %>
+<% end %><% if disjunct['country_confidence'] %><%= disjunct['country_confidence'] %>
+<% else %>
+<% end %><% if disjunct['province'] %><%= disjunct['province'] %>
+<% else %>
+<% end %><% if disjunct['province_name'] %><%= disjunct['province_name'] %>
+<% else %>
+<% end %><% if disjunct['province_confidence'] %><%= disjunct['province_confidence'] %>
+<% else %>
+<% end %><%= disjunct['latitude'] %>
 <%= disjunct['longitude'] %>
 <% [12, 10, 8, 6, 4, 3, 2].each do |precision| %><%= disjunct["geo_hash"][0, precision] %>
 <% end %><% else %><%= "\n"*17 %>
 <% end %><% end %><doc-end>
-<% end %><% else %><%= doc['id'] %><%= "\n"*5 %>
-<% libcloud_fields.each do |field| %><% if doc[field].kind_of? Array %><% doc[field].each do |field_value| %>
-<%= if field_value.respond_to? 'clean' then field_value.clean else field_value end %><% end %>
-<% elsif doc[field] %><%= if doc[field].respond_to? 'clean' then doc[field].clean else doc[field] end %><% end %>
-<% end %><%= "\n"*17*3 %>
-<doc-end>
-<% end %>
-<% end %>
+<% end %><% else %><%= doc['id'] %><%= "\n"*4 %>
+<% libcloud_fields.each do |field| %><% if doc[field].kind_of? Array %><%= doc[field].map{|field_value| if field_value.respond_to? 'clean' then field_value.clean else field_value end}.join('|||') %><% elsif doc[field] %><%= if doc[field].respond_to? 'clean' then doc[field].clean else doc[field] end %><% end %>
+<% end %><%= "\n"*17*3 %><doc-end>
+<% end %><% end %>
