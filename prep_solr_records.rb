@@ -1,8 +1,10 @@
 #!/usr/bin/env ruby
 
+require 'bundler/setup'
 require 'optparse'
 require 'json/ext'
 require 'nokogiri'
+require 'geohash'
 require 'erb'
 require 'cgi'
 
@@ -49,6 +51,7 @@ class GeoTags < Nokogiri::XML::SAX::Document
         when 'Dot'
             @disjunct['latitude']            = attrs['Latitude']
             @disjunct['longitude']           = attrs['Longitude']
+            @disjunct["geo_hash"] = GeoHash.encode(attrs['Latitude'].to_f, attrs['Longitude'].to_f, precision=12)
         end
     end
 

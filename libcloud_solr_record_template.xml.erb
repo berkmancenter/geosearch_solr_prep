@@ -64,6 +64,9 @@
         <% end %>
         <field name="Conjunct_Latitude<%= i + 1 %>"><%= disjunct['latitude'] %></field>
         <field name="Conjunct_Longitude<%= i + 1 %>"><%= disjunct['longitude'] %></field>
+        <% [12, 10, 8, 6, 4, 3, 2].each do |precision| %>
+        <field name="geo_hash<%= precision %>_<%= i + 1 %>"><%= disjunct["geo_hash"][0, precision] %></field>
+        <% end %>
         <% end %>
     </doc>
 </add>
