@@ -1,3 +1,9 @@
+GIT
+  remote: git://github.com/davetroy/geohash.git
+  revision: 03d655d5bf92554a1bf0b77f40190425dca24d91
+  specs:
+    geohash (1.1.1)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -7,4 +13,5 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  geohash!
   nokogiri
