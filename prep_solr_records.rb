@@ -33,7 +33,7 @@ class GeoTags < Nokogiri::XML::SAX::Document
                 # Grab up until the start of the line
                 term_and_field_range = (start_index..$stnetnoc.index(/$/, start_index))
                 term_and_field = $stnetnoc.slice(term_and_field_range).reverse
-                matches = /"([.a-zA-Z0-9_]*)" : /.match(term_and_field)
+                matches = /"([.a-zA-Z0-9_]*)" ?: ?/.match(term_and_field)
                 start_index = term_and_field_range.end + 1
             end
             @geo_tag['in_field'] = matches[1]
