@@ -153,7 +153,7 @@ when "dpla"
         end_chars << $`.size + m.length - 1
     end
 when "libcloud"
-    $contents.to_enum(:scan,/ \}/).map do |m,|
+    $contents.to_enum(:scan,/\}[^$]/).map do |m,|
         end_chars << $`.size
     end
 end
